@@ -38,6 +38,32 @@ header #progress {
     flex-shrink: 0; /* voorkomt dat progress krimpt */
 }
 
+header {
+    background: #222;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+#logo {
+    height: 40px;
+    position: absolute;
+    left: 20px;
+    filter: brightness(0) invert(1);
+}
+
+header h1 {
+    margin: 0 auto;
+    font-size: 1.5rem;
+}
+
+#progress {
+    position: absolute;
+    right: 20px;
+}
+
 
 
 main {
@@ -178,3 +204,5 @@ button {
     border: 2px solid #e67e22;
     background-color: #fef1e0;
 }
+
+
