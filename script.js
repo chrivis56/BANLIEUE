@@ -1,3 +1,4 @@
+// --- Variabelen ---
 const tasks = {
     openen: [
         { name: 'Kassa openen', info: 'Alles goed natellen, en openen volgens procedure.' },
@@ -29,41 +30,50 @@ const tasks = {
 const progressEl = document.getElementById('progress');
 const todayKey = new Date().toISOString().slice(0,10);
 
+// --- Functie om kolommen te tekenen ---
 function renderColumn(taskList, containerId) {
     const container = document.getElementById(containerId);
-    container.innerHTML = ''; // Leeg maken voordat we opnieuw tekenen
+    container.innerHTML = ''; // leegmaken voordat we tekenen
 
     taskList.forEach(task => {
         const card = document.createElement('div');
         card.className = 'task-card';
         card.innerText = task.name;
 
+        // info knop
         const infoBtn = document.createElement('div');
         infoBtn.className = 'info-btn';
         infoBtn.innerText = '?';
-
         infoBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             alert(task.info);
         });
 
-        // Unieke key per taak per dag
+        // unieke key per taak per dag
         const taskKey = `task-${task.name}-${todayKey}`;
 
-        // Check localStorage of taak al afgevinkt was
+        // check of taak al afgevinkt was
         if (localStorage.getItem(taskKey) === 'completed') {
             card.classList.add('completed');
         }
 
-        // Klik op taak
+        // klik om af te vinken
         card.addEventListener('click', () => {
             card.classList.toggle('completed');
-
-            // Opslaan per taak
             if (card.classList.contains('completed')) {
                 localStorage.setItem(taskKey, 'completed');
+            } else {
+                localStorage.setItem(taskKey, 'incomplete');
+            }
+            updateProgress();
+        });
 
+        card.appendChild(infoBtn);
+        container.appendChild(card);
+    });
+}
 
+// --- Update progress teller ---
 function updateProgress() {
     const allTasks = document.querySelectorAll('.task-card');
     const doneTasks = document.querySelectorAll('.task-card.completed');
@@ -77,19 +87,20 @@ function updateProgress() {
     }
 }
 
+// --- Taken renderen ---
 renderColumn(tasks.openen, 'tasks-openen');
 renderColumn(tasks.dag, 'tasks-dag');
 renderColumn(tasks.sluiten, 'tasks-sluiten');
 updateProgress();
 
-// Notities
+// --- Notities ---
 const notesField = document.getElementById('daily-notes');
 notesField.value = localStorage.getItem(`notes-${todayKey}`) || '';
 notesField.addEventListener('input', () => {
     localStorage.setItem(`notes-${todayKey}`, notesField.value);
 });
 
-// Planning knop
+// --- Planning knop ---
 document.getElementById('agenda-btn').addEventListener('click', () => {
     window.open('planning.html', '_blank');
 });
