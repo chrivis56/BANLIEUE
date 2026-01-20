@@ -184,48 +184,74 @@ document.getElementById('agenda-btn').addEventListener('click', () => {
                 .incomplete { background-color: #f7c5c5; }
                 .future { background-color: #f0f0f0; color: #888; cursor: default; }
                 .today { border: 2px solid #333; }
+                textarea { width: 100%; min-height: 80px; margin-top: 10px; font-size: 1rem; padding: 5px; }
+                button { margin-top: 5px; padding: 5px 10px; font-size: 0.9rem; }
             </style>
         </head>
         <body>
             <h2>Planning: laatste 30 dagen en komende 30 dagen</h2>
-            <div class="calendar">
+            <div class="calendar"></div>
+            <div id="notes-section">
+                <h3>Notities van geselecteerde dag</h3>
+                <textarea id="popup-notes" placeholder="Typ hier notities..."></textarea>
+                <button id="save-notes">Opslaan</button>
+            </div>
+        </body>
+        </html>
     `;
 
-    for(let i=-30;i<=30;i++){
-        const date = new Date();
-        date.setDate(today.getDate()+i);
-        const key = date.toISOString().slice(0,10);
-        const status = localStorage.getItem(`day-${key}`);
-        const isComplete = status==='complete';
-        const isFuture = date>today;
-        const isToday = key===todayKey;
-
-        let className='';
-        let symbol='';
-
-        if(isComplete){ className='complete'; symbol='✅'; }
-        else if(isFuture){ className='future'; symbol=''; }
-        else{ className='incomplete'; symbol='❌'; }
-
-        if(isToday) className += ' today';
-
-        html += `<div class="day ${className}" data-date="${key}">${date.getDate()}/${date.getMonth()+1}<br>${symbol}</div>`;
-    }
-
-    html += `</div></body></html>`;
-
-    const popup = window.open('', 'Planning', 'width=600,height=600');
+    const popup = window.open('', 'Planning', 'width=700,height=600');
     popup.document.write(html);
 
-    popup.onload = ()=>{
-        const dayEls = popup.document.querySelectorAll('.day');
-        dayEls.forEach(dayEl=>{
-            if(!dayEl.classList.contains('future')){
-                dayEl.addEventListener('click',()=>{
-                    const dateKey = dayEl.dataset.date;
-                    const notes = localStorage.getItem(`notes-${dateKey}`) || 'Geen notities voor deze dag.';
-                    alert(`Notities ${dateKey}:\n\n${notes}`);
+    popup.onload = () => {
+        const calendarEl = popup.document.querySelector('.calendar');
+        const notesField = popup.document.getElementById('popup-notes');
+        const saveBtn = popup.document.getElementById('save-notes');
+        let selectedDateKey = null;
+
+        // Bouw kalender
+        for(let i=-30; i<=30; i++){
+            const date = new Date();
+            date.setDate(today.getDate() + i);
+            const key = date.toISOString().slice(0,10);
+
+            const status = localStorage.getItem(`day-${key}`);
+            const isComplete = status==='complete';
+            const isFuture = date>today;
+            const isToday = key===todayKey;
+
+            let className = '';
+            let symbol = '';
+
+            if(isComplete){ className='complete'; symbol='✅'; }
+            else if(isFuture){ className='future'; symbol=''; }
+            else{ className='incomplete'; symbol='❌'; }
+
+            if(isToday) className += ' today';
+
+            const dayEl = popup.document.createElement('div');
+            dayEl.className = `day ${className}`;
+            dayEl.dataset.date = key;
+            dayEl.innerHTML = `${date.getDate()}/${date.getMonth()+1}<br>${symbol}`;
+
+            // Klik op dag
+            if(!isFuture){
+                dayEl.addEventListener('click', () => {
+                    selectedDateKey = key;
+                    notesField.value = localStorage.getItem(`notes-${key}`) || '';
                 });
+            }
+
+            calendarEl.appendChild(dayEl);
+        }
+
+        // Notities opslaan
+        saveBtn.addEventListener('click', () => {
+            if(selectedDateKey){
+                localStorage.setItem(`notes-${selectedDateKey}`, notesField.value);
+                alert(`Notities voor ${selectedDateKey} opgeslagen!`);
+            } else {
+                alert('Selecteer eerst een dag in de kalender!');
             }
         });
     };
