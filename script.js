@@ -81,12 +81,6 @@ function updateProgress() {
 }
 
 }
-
-renderColumn(tasks.openen, 'tasks-openen');
-renderColumn(tasks.dag, 'tasks-dag');
-renderColumn(tasks.sluiten, 'tasks-sluiten');
-updateProgress();
-
 // Notities
 const notes = document.getElementById('daily-notes');
 notes.value = localStorage.getItem(`notes-${todayKey}`) || '';
@@ -98,3 +92,8 @@ notes.oninput = () => {
 document.getElementById('agenda-btn').onclick = () => {
     window.open('planning.html', '_blank');
 };
+
+renderColumn(tasks.openen, 'tasks-openen');
+renderColumn(tasks.dag, 'tasks-dag');
+renderColumn(tasks.sluiten, 'tasks-sluiten');
+updateProgress();
