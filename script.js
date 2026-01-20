@@ -171,88 +171,86 @@ document.getElementById('agenda-btn').addEventListener('click', () => {
     const today = new Date();
     const todayKey = today.toISOString().slice(0,10);
 
-    let html = `
-        <html>
-        <head>
-            <title>Planning</title>
-            <style>
-                body { font-family: Arial; padding: 20px; }
-                h2 { text-align: center; }
-                .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-top:20px; }
-                .day { padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; }
-                .complete { background-color: #c8f7c5; }
-                .incomplete { background-color: #f7c5c5; }
-                .future { background-color: #f0f0f0; color: #888; cursor: default; }
-                .today { border: 2px solid #333; }
-                textarea { width: 100%; min-height: 80px; margin-top: 10px; font-size: 1rem; padding: 5px; }
-                button { margin-top: 5px; padding: 5px 10px; font-size: 0.9rem; }
-            </style>
-        </head>
-        <body>
-            <h2>Planning: laatste 30 dagen en komende 30 dagen</h2>
-            <div class="calendar"></div>
-            <div id="notes-section">
-                <h3>Notities van geselecteerde dag</h3>
-                <textarea id="popup-notes" placeholder="Typ hier notities..."></textarea>
-                <button id="save-notes">Opslaan</button>
-            </div>
-        </body>
-        </html>
-    `;
-
+    // Open lege popup
     const popup = window.open('', 'Planning', 'width=700,height=600');
-    popup.document.write(html);
+    if (!popup) return alert("Popups zijn geblokkeerd! Zet popups aan.");
 
-    popup.onload = () => {
-        const calendarEl = popup.document.querySelector('.calendar');
-        const notesField = popup.document.getElementById('popup-notes');
-        const saveBtn = popup.document.getElementById('save-notes');
-        let selectedDateKey = null;
+    // Styles toevoegen
+    const style = popup.document.createElement('style');
+    style.innerHTML = `
+        body { font-family: Arial; padding: 20px; }
+        h2 { text-align: center; }
+        .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-top:20px; }
+        .day { padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; }
+        .complete { background-color: #c8f7c5; }
+        .incomplete { background-color: #f7c5c5; }
+        .future { background-color: #f0f0f0; color: #888; cursor: default; }
+        .today { border: 2px solid #333; }
+        textarea { width: 100%; min-height: 80px; margin-top: 10px; font-size: 1rem; padding: 5px; }
+        button { margin-top: 5px; padding: 5px 10px; font-size: 0.9rem; }
+    `;
+    popup.document.head.appendChild(style);
 
-        // Bouw kalender
-        for(let i=-30; i<=30; i++){
-            const date = new Date();
-            date.setDate(today.getDate() + i);
-            const key = date.toISOString().slice(0,10);
+    // Body content
+    const h2 = popup.document.createElement('h2');
+    h2.innerText = 'Planning: laatste 30 dagen en komende 30 dagen';
+    popup.document.body.appendChild(h2);
 
-            const status = localStorage.getItem(`day-${key}`);
-            const isComplete = status==='complete';
-            const isFuture = date>today;
-            const isToday = key===todayKey;
+    const calendarEl = popup.document.createElement('div');
+    calendarEl.className = 'calendar';
+    popup.document.body.appendChild(calendarEl);
 
-            let className = '';
-            let symbol = '';
+    const notesSection = popup.document.createElement('div');
+    notesSection.innerHTML = `
+        <h3>Notities van geselecteerde dag</h3>
+        <textarea id="popup-notes" placeholder="Typ hier notities..."></textarea>
+        <button id="save-notes">Opslaan</button>
+    `;
+    popup.document.body.appendChild(notesSection);
 
-            if(isComplete){ className='complete'; symbol='✅'; }
-            else if(isFuture){ className='future'; symbol=''; }
-            else{ className='incomplete'; symbol='❌'; }
+    const notesField = popup.document.getElementById('popup-notes');
+    const saveBtn = popup.document.getElementById('save-notes');
+    let selectedDateKey = null;
 
-            if(isToday) className += ' today';
+    // Kalender vullen
+    for(let i=-30; i<=30; i++){
+        const date = new Date();
+        date.setDate(today.getDate()+i);
+        const key = date.toISOString().slice(0,10);
 
-            const dayEl = popup.document.createElement('div');
-            dayEl.className = `day ${className}`;
-            dayEl.dataset.date = key;
-            dayEl.innerHTML = `${date.getDate()}/${date.getMonth()+1}<br>${symbol}`;
+        const status = localStorage.getItem(`day-${key}`);
+        const isComplete = status==='complete';
+        const isFuture = date>today;
+        const isToday = key===todayKey;
 
-            // Klik op dag
-            if(!isFuture){
-                dayEl.addEventListener('click', () => {
-                    selectedDateKey = key;
-                    notesField.value = localStorage.getItem(`notes-${key}`) || '';
-                });
-            }
+        let className='', symbol='';
+        if(isComplete){ className='complete'; symbol='✅'; }
+        else if(isFuture){ className='future'; symbol=''; }
+        else{ className='incomplete'; symbol='❌'; }
+        if(isToday) className += ' today';
 
-            calendarEl.appendChild(dayEl);
+        const dayEl = popup.document.createElement('div');
+        dayEl.className = `day ${className}`;
+        dayEl.dataset.date = key;
+        dayEl.innerHTML = `${date.getDate()}/${date.getMonth()+1}<br>${symbol}`;
+
+        if(!isFuture){
+            dayEl.addEventListener('click', () => {
+                selectedDateKey = key;
+                notesField.value = localStorage.getItem(`notes-${key}`) || '';
+            });
         }
 
-        // Notities opslaan
-        saveBtn.addEventListener('click', () => {
-            if(selectedDateKey){
-                localStorage.setItem(`notes-${selectedDateKey}`, notesField.value);
-                alert(`Notities voor ${selectedDateKey} opgeslagen!`);
-            } else {
-                alert('Selecteer eerst een dag in de kalender!');
-            }
-        });
-    };
+        calendarEl.appendChild(dayEl);
+    }
+
+    // Opslaan knop
+    saveBtn.addEventListener('click', () => {
+        if(selectedDateKey){
+            localStorage.setItem(`notes-${selectedDateKey}`, notesField.value);
+            alert(`Notities voor ${selectedDateKey} opgeslagen!`);
+        } else {
+            alert('Selecteer eerst een dag in de kalender!');
+        }
+    });
 });
