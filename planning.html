@@ -5,6 +5,60 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Planning</title>
 <link rel="stylesheet" href="style.css">
+<style>
+/* Specifiek voor de kalender */
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin: 20px 0;
+}
+
+.day {
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: bold;
+    user-select: none;
+    transition: 0.2s;
+}
+
+.day.complete { background-color: #c8f7c5; }
+.day.incomplete { background-color: #f7c5c5; }
+.day.future { background-color: #f0f0f0; color: #888; cursor: default; }
+.day.today { border: 2px solid #333; }
+
+.day:hover:not(.future) { transform: scale(1.05); }
+
+#notes-section {
+    margin-top: 20px;
+}
+
+#notes-section textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    resize: vertical;
+}
+
+#notes-section button {
+    margin-top: 8px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    background-color: #333;
+    color: white;
+    cursor: pointer;
+}
+#notes-section button:hover {
+    background-color: #555;
+}
+</style>
 </head>
 <body>
 
