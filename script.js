@@ -31,7 +31,7 @@ const todayKey = new Date().toISOString().slice(0,10);
 
 function renderColumn(taskList, containerId) {
     const container = document.getElementById(containerId);
-    container.innerHTML = '';
+    container.innerHTML = ''; // Leeg maken voordat we opnieuw tekenen
 
     taskList.forEach(task => {
         const card = document.createElement('div');
@@ -47,15 +47,22 @@ function renderColumn(taskList, containerId) {
             alert(task.info);
         });
 
+        // Unieke key per taak per dag
+        const taskKey = `task-${task.name}-${todayKey}`;
+
+        // Check localStorage of taak al afgevinkt was
+        if (localStorage.getItem(taskKey) === 'completed') {
+            card.classList.add('completed');
+        }
+
+        // Klik op taak
         card.addEventListener('click', () => {
             card.classList.toggle('completed');
-            updateProgress();
-        });
 
-        card.appendChild(infoBtn);
-        container.appendChild(card);
-    });
-}
+            // Opslaan per taak
+            if (card.classList.contains('completed')) {
+                localStorage.setItem(taskKey, 'completed');
+
 
 function updateProgress() {
     const allTasks = document.querySelectorAll('.task-card');
