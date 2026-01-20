@@ -68,11 +68,18 @@ function renderColumn(list, containerId) {
 }
 
 function updateProgress() {
-    const done = document.querySelectorAll('.task-card.completed').length;
-    const total = document.querySelectorAll('.task-card').length;
-    progressEl.innerText = `${done}/${total}`;
+    const allTasks = document.querySelectorAll('.task-card');
+    const doneTasks = document.querySelectorAll('.task-card.completed');
 
-    localStorage.setItem(`day-${todayKey}`, done === total ? 'complete' : 'incomplete');
+    progressEl.innerText = `${doneTasks.length}/${allTasks.length}`;
+
+    if (allTasks.length > 0 && doneTasks.length === allTasks.length) {
+        localStorage.setItem(`day-${todayKey}`, 'complete');
+    } else {
+        localStorage.setItem(`day-${todayKey}`, 'incomplete');
+    }
+}
+
 }
 
 renderColumn(tasks.openen, 'tasks-openen');
