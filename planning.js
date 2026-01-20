@@ -6,7 +6,7 @@ const notesField = document.getElementById('popup-notes');
 const saveBtn = document.getElementById('save-notes');
 let selectedDateKey = null;
 
-// Kalender vullen: 30 dagen terug + 30 vooruit
+// Bouw kalender: 30 dagen terug + 30 dagen vooruit
 for(let i=-30; i<=30; i++){
     const date = new Date();
     date.setDate(today.getDate()+i);
@@ -38,7 +38,7 @@ for(let i=-30; i<=30; i++){
     calendarEl.appendChild(dayEl);
 }
 
-// Opslaan knop
+// Notities opslaan
 saveBtn.addEventListener('click', () => {
     if(selectedDateKey){
         localStorage.setItem(`notes-${selectedDateKey}`, notesField.value);
