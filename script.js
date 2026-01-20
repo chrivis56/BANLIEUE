@@ -1,7 +1,4 @@
-// ---------------------------
-// Versie 2 - script.js
-// ---------------------------
-
+// --- Takenlijst ---
 const tasks = {
     openen: [
         { name: 'Kassa openen', info: 'Alles goed natellen, en openen volgens procedure.' },
@@ -30,36 +27,45 @@ const tasks = {
     ]
 };
 
-// Progress element
+// --- Progress element ---
 const progressEl = document.getElementById('progress');
 
-// ---------------------------
-// Render Column Function
-// ---------------------------
+// --- Taken renderen met persistentie ---
 function renderColumn(taskList, containerId) {
     const container = document.getElementById(containerId);
-    container.innerHTML = ''; // clear previous
+    const todayKey = new Date().toISOString().slice(0,10);
 
     taskList.forEach(task => {
         const card = document.createElement('div');
         card.className = 'task-card';
-        if(task.special) card.classList.add('special-task');
 
         const title = document.createElement('label');
-        title.className = 'task-title';
         title.innerText = task.name;
 
         const infoBtn = document.createElement('div');
         infoBtn.className = 'info-btn';
         infoBtn.innerText = '?';
-
-        infoBtn.addEventListener('click', (e) => {
+        infoBtn.addEventListener('click', e => {
             e.stopPropagation();
             alert(task.info);
         });
 
+        // --- Check localStorage voor deze taak
+        const taskKey = `day-${todayKey}-task-${task.name}`;
+        if(localStorage.getItem(taskKey) === 'completed'){
+            card.classList.add('completed');
+        }
+
         card.addEventListener('click', () => {
             card.classList.toggle('completed');
+
+            // Opslaan in localStorage
+            if(card.classList.contains('completed')){
+                localStorage.setItem(taskKey, 'completed');
+            } else {
+                localStorage.setItem(taskKey, 'incomplete');
+            }
+
             updateProgress();
         });
 
@@ -69,188 +75,32 @@ function renderColumn(taskList, containerId) {
     });
 }
 
-// ---------------------------
-// Render Dag Column met VM taak
-// ---------------------------
-function renderDagColumn() {
-    const container = document.getElementById('tasks-dag');
-    container.innerHTML = '';
-
-    const today = new Date();
-    const dayOfWeek = today.getDay(); // 1 = maandag
-    const weekNumber = getWeekNumber(today); // ISO weeknummer
-    const isVMday = (dayOfWeek === 1) && (weekNumber % 2 === 0);
-
-    let dagTasks = [...tasks.dag];
-
-    if(isVMday) {
-        dagTasks.unshift({
-            name: 'VM',
-            info: 'Speciale taak: Voormiddag check',
-            special: true
-        });
-    }
-
-    dagTasks.forEach(task => {
-        const card = document.createElement('div');
-        card.className = 'task-card';
-        if(task.special) card.classList.add('special-task');
-
-        const title = document.createElement('label');
-        title.className = 'task-title';
-        title.innerText = task.name;
-
-        const infoBtn = document.createElement('div');
-        infoBtn.className = 'info-btn';
-        infoBtn.innerText = '?';
-
-        infoBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            alert(task.info);
-        });
-
-        card.addEventListener('click', () => {
-            card.classList.toggle('completed');
-            updateProgress();
-        });
-
-        card.appendChild(title);
-        card.appendChild(infoBtn);
-        container.appendChild(card);
-    });
-}
-
-// ---------------------------
-// ISO Week Number
-// ---------------------------
-function getWeekNumber(d) {
-    d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-    const dayNum = d.getUTCDay() || 7;
-    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-    return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
-}
-
-// ---------------------------
-// Update Progress
-// ---------------------------
-function updateProgress() {
+// --- Progress updaten ---
+function updateProgress(){
     const done = document.querySelectorAll('.task-card.completed').length;
     const total = document.querySelectorAll('.task-card').length;
     progressEl.innerText = `${done}/${total} klaar`;
-
-    const today = new Date().toISOString().slice(0,10);
-    if(done === total) localStorage.setItem(`day-${today}`, 'complete');
-    else localStorage.setItem(`day-${today}`, 'incomplete');
 }
 
-// ---------------------------
-// Render Columns
-// ---------------------------
+// --- Render alle kolommen ---
 renderColumn(tasks.openen, 'tasks-openen');
-renderDagColumn();
+renderColumn(tasks.dag, 'tasks-dag');
 renderColumn(tasks.sluiten, 'tasks-sluiten');
 updateProgress();
 
-// ---------------------------
-// Notities
-// ---------------------------
+// --- Notities ---
 const notesField = document.getElementById('daily-notes');
 const todayKey = new Date().toISOString().slice(0,10);
-if(notesField) {
+
+if(notesField){
     notesField.value = localStorage.getItem(`notes-${todayKey}`) || '';
+
     notesField.addEventListener('input', () => {
         localStorage.setItem(`notes-${todayKey}`, notesField.value);
     });
 }
 
-// ---------------------------
-// Planning knop
-// ---------------------------
+// --- Planning knop ---
 document.getElementById('agenda-btn').addEventListener('click', () => {
-    const today = new Date();
-    const todayKey = today.toISOString().slice(0,10);
-
-    // Open lege popup
-    const popup = window.open('', 'Planning', 'width=700,height=600');
-    if (!popup) return alert("Popups zijn geblokkeerd! Zet popups aan.");
-
-    // Styles toevoegen
-    const style = popup.document.createElement('style');
-    style.innerHTML = `
-        body { font-family: Arial; padding: 20px; }
-        h2 { text-align: center; }
-        .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-top:20px; }
-        .day { padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; }
-        .complete { background-color: #c8f7c5; }
-        .incomplete { background-color: #f7c5c5; }
-        .future { background-color: #f0f0f0; color: #888; cursor: default; }
-        .today { border: 2px solid #333; }
-        textarea { width: 100%; min-height: 80px; margin-top: 10px; font-size: 1rem; padding: 5px; }
-        button { margin-top: 5px; padding: 5px 10px; font-size: 0.9rem; }
-    `;
-    popup.document.head.appendChild(style);
-
-    // Body content
-    const h2 = popup.document.createElement('h2');
-    h2.innerText = 'Planning: laatste 30 dagen en komende 30 dagen';
-    popup.document.body.appendChild(h2);
-
-    const calendarEl = popup.document.createElement('div');
-    calendarEl.className = 'calendar';
-    popup.document.body.appendChild(calendarEl);
-
-    const notesSection = popup.document.createElement('div');
-    notesSection.innerHTML = `
-        <h3>Notities van geselecteerde dag</h3>
-        <textarea id="popup-notes" placeholder="Typ hier notities..."></textarea>
-        <button id="save-notes">Opslaan</button>
-    `;
-    popup.document.body.appendChild(notesSection);
-
-    const notesField = popup.document.getElementById('popup-notes');
-    const saveBtn = popup.document.getElementById('save-notes');
-    let selectedDateKey = null;
-
-    // Kalender vullen
-    for(let i=-30; i<=30; i++){
-        const date = new Date();
-        date.setDate(today.getDate()+i);
-        const key = date.toISOString().slice(0,10);
-
-        const status = localStorage.getItem(`day-${key}`);
-        const isComplete = status==='complete';
-        const isFuture = date>today;
-        const isToday = key===todayKey;
-
-        let className='', symbol='';
-        if(isComplete){ className='complete'; symbol='✅'; }
-        else if(isFuture){ className='future'; symbol=''; }
-        else{ className='incomplete'; symbol='❌'; }
-        if(isToday) className += ' today';
-
-        const dayEl = popup.document.createElement('div');
-        dayEl.className = `day ${className}`;
-        dayEl.dataset.date = key;
-        dayEl.innerHTML = `${date.getDate()}/${date.getMonth()+1}<br>${symbol}`;
-
-        if(!isFuture){
-            dayEl.addEventListener('click', () => {
-                selectedDateKey = key;
-                notesField.value = localStorage.getItem(`notes-${key}`) || '';
-            });
-        }
-
-        calendarEl.appendChild(dayEl);
-    }
-
-    // Opslaan knop
-    saveBtn.addEventListener('click', () => {
-        if(selectedDateKey){
-            localStorage.setItem(`notes-${selectedDateKey}`, notesField.value);
-            alert(`Notities voor ${selectedDateKey} opgeslagen!`);
-        } else {
-            alert('Selecteer eerst een dag in de kalender!');
-        }
-    });
+    window.location.href = 'planning.html';
 });
