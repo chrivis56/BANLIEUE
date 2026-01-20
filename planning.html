@@ -1,30 +1,123 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Planning</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Planning</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+            max-width: 900px;
+            margin: 30px auto;
+        }
+
+        .day {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .day.complete {
+            background: #c8f7c5;
+        }
+
+        .day.incomplete {
+            background: #f7c5c5;
+        }
+
+        .day.future {
+            background: #eaeaea;
+            color: #888;
+            cursor: default;
+        }
+
+        .day.today {
+            border: 2px solid #222;
+        }
+
+        .date {
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .status {
+            font-size: 20px;
+        }
+    </style>
 </head>
 <body>
 
-<header>
-    <h1>Planning</h1>
-</header>
+<h1>Planning (30 dagen terug & vooruit)</h1>
 
-<main>
-    <!-- Kalender -->
-    <div class="calendar"></div>
+<div class="calendar" id="calendar"></div>
 
-    <!-- Notities -->
-    <div id="notes-section">
-        <h3>Notities van geselecteerde dag</h3>
-        <textarea id="popup-notes" placeholder="Typ hier notities..."></textarea>
-        <button id="save-notes">Opslaan</button>
-    </div>
-</main>
+<script>
+    const calendarEl = document.getElementById('calendar');
+    const today = new Date();
+    const todayKey = today.toISOString().slice(0,10);
 
-<!-- Losse JS -->
-<script src="planning.js"></script>
+    for (let i = -30; i <= 30; i++) {
+        const date = new Date();
+        date.setDate(today.getDate() + i);
+
+        const key = date.toISOString().slice(0,10);
+        const dayEl = document.createElement('div');
+        dayEl.classList.add('day');
+
+        const dateLabel = document.createElement('div');
+        dateLabel.className = 'date';
+        dateLabel.innerText = `${date.getDate()}-${date.getMonth()+1}`;
+
+        const statusEl = document.createElement('div');
+        statusEl.className = 'status';
+
+        const storedStatus = localStorage.getItem(`day-${key}`);
+
+        if (date > today) {
+            dayEl.classList.add('future');
+            statusEl.innerText = '⏳';
+        } else if (storedStatus === 'complete') {
+            dayEl.classList.add('complete');
+            statusEl.innerText = '✅';
+        } else {
+            dayEl.classList.add('incomplete');
+            statusEl.innerText = '❌';
+        }
+
+        if (key === todayKey) {
+            dayEl.classList.add('today');
+        }
+
+        dayEl.appendChild(dateLabel);
+        dayEl.appendChild(statusEl);
+
+        // Klik → notities tonen
+        if (!dayEl.classList.contains('future')) {
+            dayEl.addEventListener('click', () => {
+                const notes = localStorage.getItem(`notes-${key}`) || 'Geen notities voor deze dag.';
+                alert(`Notities (${key}):\n\n${notes}`);
+            });
+        }
+
+        calendarEl.appendChild(dayEl);
+    }
+</script>
+
 </body>
 </html>
