@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Winkel Taken</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <img src="images/logo.png" alt="Winkel Logo" id="logo">
+    <h1>Dagelijkse taken</h1>
+    <div id="progress">0/0</div>
+</header>
+
+
+<main>
+  <div id="tasks-wrapper">
+    <div class="task-column">
+        <h2>Openen</h2>
+        <div id="tasks-openen"></div>
+    </div>
+
+    <div class="task-column">
+        <h2>Gedurende de dag</h2>
+        <div id="tasks-dag"></div>
+    </div>
+
+    <div class="task-column">
+        <h2>Sluiten</h2>
+        <div id="tasks-sluiten"></div>
+    </div>
+</div>
+
+<div id="notes-section">
+    <h2>Notities van vandaag</h2>
+    <textarea id="daily-notes" placeholder="Typ hier bijzonderheden van vandaag..."></textarea>
+</div>
+
+</main>
+
+<footer>
+    <button id="agenda-btn">📅 Planning</button>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
