@@ -17,10 +17,14 @@ header {
 }
 
 #logo {
-    height: 40px;
-    position: absolute;
-    left: 20px;
-    filter: brightness(0) invert(1);
+    height: 40px;              /* pas de grootte aan */
+    position: absolute;         /* absolute position zodat het los van de tekst staat */
+    top: 10px;                  /* 10px vanaf de bovenkant */
+    left: 20px;                 /* 20px vanaf de linkerkant */
+    z-index: 10;                /* zorgt dat het boven andere elementen staat */
+    filter: brightness(0) invert(1); /* maakt je zwarte logo wit */
+}
+
 }
 
 header h1 {
