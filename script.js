@@ -21,4 +21,8 @@ render(tasks.openen, 'tasks-openen');
 render(tasks.dag, 'tasks-dag');
 render(tasks.sluiten, 'tasks-sluiten');
 
+document.getElementById('agenda-btn').onclick = () => {
+    window.open('planning.html', '_blank');
+};
+
 };
